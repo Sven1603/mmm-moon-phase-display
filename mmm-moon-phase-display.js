@@ -5,8 +5,17 @@ Module.register("mmm-moon-phase-display",{
     // Default module config.
     defaults: {
         width: "40",
-        height: "40"
+        height: "40",
     },
+    
+    start: function() {
+		Log.info('Starting module: ' + this.name);
+		// Refresh the Dom every 12 hours
+        var timer = setInterval(()=>{
+            this.updateDom()
+        }, 43200000)
+
+	},
 
     // Override dom generator.
     getDom: function() {
