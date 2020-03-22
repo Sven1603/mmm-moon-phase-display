@@ -16,7 +16,7 @@ Module.register("mmm-moon-phase-display",{
           4 => full moon.
           calculations based on https://www.subsystems.us/uploads/9/8/9/4/98948044/moonphase.pdf
           */
-        var date = new Date()
+        /* var date = new Date()
         var day = date.getDate()
         var month = date.getMonth() + 1
         var year = date.getFullYear()
@@ -72,7 +72,7 @@ Module.register("mmm-moon-phase-display",{
             case phase < 28.5:
                 moonImage = './img/7-waning-crescent.jpg'
                 break
-        }
+        } */
 
         // Create and return the necessary html
         var wrapper = document.createElement("div")
@@ -81,14 +81,15 @@ Module.register("mmm-moon-phase-display",{
             wrapper.style.overflow = "hidden"
             wrapper.style.position = "relative"
             wrapper.style.textAlign = "center"
+            wrapper.style.backgroundColor = "#fff"
 
-        var img = document.createElement("img")
+        /* var img = document.createElement("img")
             img.style.position = "relative"
             img.height = this.config.height
             img.width = this.config.width
             img.src = moonImage
             wrapper.appendChild(img)
-
+        */
         return wrapper
     }
 });
