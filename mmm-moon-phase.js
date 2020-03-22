@@ -1,151 +1,94 @@
-/* global Log, Module */
-/* MMM2 Module */
+// MagicMirror Module
+// © Sven Stroomberg
 
-/* SvenStroom
- * Module: Moon Phase Display
- *
- * MIT Licensed.
- */
+Module.register("mmm-moon-phase-display",{
+    // Default module config.
+    defaults: {
+        width: "218px",
+        height: "218px";
+    },
 
-Module.register("mmm-moon-phase-display", {
-        defaults: {
-                updateInterval: 14400 * 1000, // every 2 hours
-                initialLoadDelay: 1,
-                retryDelay: 2500,
-                height: 150,
-                width: 150,
-//              delay: 0,
-                homeMM: "/home/pi/Projects/MagicMirror"
-        },
+    // Override dom generator.
+    getDom: function() {
+        /*
+          calculates the moon phase (0-7), accurate to 1 segment.
+          0 = > new moon.
+          4 => full moon.
+          calculations based on https://www.subsystems.us/uploads/9/8/9/4/98948044/moonphase.pdf
+          */
+        var date = new Date()
+        var day = date.getDate()
+        var month = date.getMonth() + 1
+        var year = date.getFullYear()
 
-        // Define required scripts.
-        getScripts: function() {
-                return ["moment.js"];
+        if (month < 3) {
+            year--
+            month += 12
+        }
 
-        },
+        // Calculate Julian Day (jd) 
+        var a = parseInt(year / 100)
+        var b = parseInt(a / 4)
+        var c = 2 - a + b
+        var e = parseInt(365.25 * (year + 4716))
+        var f = parseInt(30.6001 * (month + 1))
+        var jd = c + day + e + f - 1524.5
 
-        getDom: function() {
-                var wrapper = document.createElement("div");
-                wrapper.style.width = this.config.width + "px";
-                wrapper.style.height = this.config.height + "px";
-                wrapper.style.overflow = "hidden";
-                wrapper.style.position = "relative";
+        var daysSinceNew = jd - 2451549.5
+        var newMoons = daysSinceNew / 29.53
+        var newMoonsFract = newMoons - parseInt(newMoons)   // Get the fractional part of newMoons
+        var phase = newMoonsFract * 29.53
+        
 
-                var img = document.createElement("img");
-                img.style.position = "absolute";
-                img.style.left = "5px";
-                img.style.top = "-" + Math.round(this.config.height / 10) + "px";
-                img.height = this.config.height;
-                img.width = this.config.width;
-                img.src = updateMoon();
-                wrapper.appendChild(img);
-                return wrapper;
-        },
+        if (phase >= 28.5) {        // 0 and 8 are the same so turn 8 into 0
+            phase = 0
+        }
 
-        // Define start sequence.
-        start: function() {
-                Log.info("Starting module: " + this.name);
+        // Choose correct moon phase image
+        var moonImage = ''
 
-                this.loaded = false;
-                this.scheduleUpdate(this.config.initialLoadDelay);
-                this.updateTimer = null;
+        switch(true){
+            case  phase < 1.5:
+                moonImage = './img/0-new-moon.jpg'
+                break
+            case phase < 6:
+                moonImage = './img/1-waxing-crescent.jpg'
+                break
+            case phase < 9:
+                moonImage = './img/2-first-quarter.jpg'
+                break
+            case phase < 14:
+                moonImage = './img/3-waxing-gibbous.jpg'
+                break
+            case phase < 16:
+                moonImage = './img/4-full-moon.jpg'
+                break
+            case phase < 21:
+                moonImage = './img/5-waning-gibbous.jpg'
+                break
+            case phase < 24:
+                moonImage = './img/6-last-quarter.jpg'
+                break
+            case phase < 28.5:
+                moonImage = './img/7-waning-crescent.jpg'
+                break
+        }
 
-        },
+        // Create and return the necessary html
+        var wrapper = document.createElement("div")
+            wrapper.style.width = this.config.width + "px"
+            wrapper.style.height = this.config.height + "px"
+            wrapper.style.overflow = "hidden"
+            wrapper.style.position = "relative"
+            wrapper.style.textAlign = "center"
 
-        updateMoon: function() {
-                /*
-              calculates the moon phase (0-7), accurate to 1 segment.
-              0 = > new moon.
-              4 => full moon.
-              based on https://www.subsystems.us/uploads/9/8/9/4/98948044/moonphase.pdf
-              */
-            var moonImage = ''
-            var date = new Date()
-            var day = 10
-            var month = date.getMonth() + 1
-            var year = date.getFullYear()
+        var img = document.createElement("img")
+            img.style.position = "relative"
+            img.height = this.config.height
+            img.width = this.config.width
+            img.src = moonImage
+            wrapper.appendChild(img)
 
-            if (month < 3) {
-                year--
-                month += 12
-            }
-
-            /* Calculate Julian Day (jd) */
-            var a = parseInt(year / 100)
-            var b = parseInt(a / 4)
-            var c = 2 - a - b
-            var e = parseInt(365.25 * (year + 4716))
-            var f = parseInt(30.6001 * (month + 1))
-            var jd = c + day + e + f - 1524.5
-
-            var daysSinceNew = jd - 2451549.5
-            var newMoons = daysSinceNew / 29.53
-
-            var newMoonsFract = newMoons - parseInt(newMoons)   /* Get the fractional part of newMoons */
-
-            var daysInCycle = Math.round(newMoonsFract * 29.53)
-
-            
-            if (daysInCycle >= 7) {        /* 0 and 8 are the same so turn 8 into 0 */
-                daysInCycle = 0
-            }
-
-            console.log(day)
-            console.log(month)
-            console.log(year)
-            switch(daysInCycle){
-                case 0:
-                    moonImage = './img/0-new-moon.jpg'
-                    break
-                case 1:
-                    moonImage = './img/1-waning-crescent.jpg'
-                    break
-                case 2:
-                    moonImage = './img/2-third-quarter.jpg'
-                    break
-                case 3:
-                    moonImage = './img/3-waning-gibbous.jpg'
-                    break
-                case 4:
-                    moonImage = './img/4-full-moon.jpg'
-                    break
-                case 5:
-                    moonImage = './img/5-waxing-gibbous.jpg'
-                    break
-                case 6:
-                    moonImage = './img/6-first-quarter.jpg'
-                    break
-                case 7:
-                    moonImage = './img/7-waxing-crescent.jpg'
-                    break
-            }
-
-            return moonImage
-        },
-
-        socketNotificationReceived: function(notification, payload) {
-                if(notification === "MOON"){
-                        this.imgmoon=payload
-                        if (typeof this.imgmoon !== "undefined") {
-                            this.loaded=true;
-                            this.updateDom();
-                        };
-                        this.scheduleUpdate();
-                }
-
-        },
-
-        scheduleUpdate: function(delay) {
-                var nextLoad = this.config.updateInterval;
-                if (typeof delay !== "undefined" && delay >= 0) {
-                        nextLoad = delay;
-                }
-
-                var self = this;
-                clearTimeout(this.updateTimer);
-                this.updateTimer = setTimeout(function() {
-                        self.updateMoon();
-                }, nextLoad);
-        },
-
+        return wrapper
+    }
 });
