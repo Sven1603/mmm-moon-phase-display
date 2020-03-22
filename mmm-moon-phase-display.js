@@ -72,7 +72,7 @@ Module.register("mmm-moon-phase-display",{
                 moonImage = './img/7-waning-crescent.jpg'
                 break
         }
-
+        */
         // Create and return the necessary html
         var wrapper = document.createElement("div")
             wrapper.style.width = this.config.width + "px"
@@ -81,7 +81,7 @@ Module.register("mmm-moon-phase-display",{
             wrapper.style.position = "relative"
             wrapper.style.textAlign = "center"
             wrapper.style.backgroundColor = "#fff"
-
+        /*
         var img = document.createElement("img")
             img.style.position = "relative"
             img.height = this.config.height
@@ -89,9 +89,6 @@ Module.register("mmm-moon-phase-display",{
             img.src = moonImage
             wrapper.appendChild(img)
         */
-
-        var wrapper = document.createElement("div")
-        wrapper.innerHTML = this.config.text
 
         return wrapper
     }
