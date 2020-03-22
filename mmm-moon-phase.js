@@ -4,8 +4,7 @@
 Module.register("mmm-moon-phase-display",{
     // Default module config.
     defaults: {
-        width: "218px",
-        height: "218px";
+        text: "Hello World!"
     },
 
     // Override dom generator.
@@ -72,7 +71,7 @@ Module.register("mmm-moon-phase-display",{
             case phase < 28.5:
                 moonImage = './img/7-waning-crescent.jpg'
                 break
-        } */
+        }
 
         // Create and return the necessary html
         var wrapper = document.createElement("div")
@@ -83,13 +82,17 @@ Module.register("mmm-moon-phase-display",{
             wrapper.style.textAlign = "center"
             wrapper.style.backgroundColor = "#fff"
 
-        /* var img = document.createElement("img")
+        var img = document.createElement("img")
             img.style.position = "relative"
             img.height = this.config.height
             img.width = this.config.width
             img.src = moonImage
             wrapper.appendChild(img)
         */
+
+        var wrapper = document.createElement("div")
+        wrapper.innerHTML = this.config.text
+
         return wrapper
     }
 });
